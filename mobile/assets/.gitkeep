@@ -1,0 +1,2 @@
+# Ajoutez icon.png, splash.png, adaptive-icon.png pour Expo
+# Ou exécutez: npx create-expo-app temp --template blank && cp -r temp/assets/* . && rm -rf temp

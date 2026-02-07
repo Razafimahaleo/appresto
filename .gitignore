@@ -1,0 +1,33 @@
+# Dependencies
+backend/node_modules/
+backend/package.json
+
+mobile/node_modules/
+mobile/package.json
+mobile/temp-app/
+# Environment
+backend/.env
+mobile/.env
+.env.local
+.env.*.local
+
+# Build
+dist/
+build/
+.expo/
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Firebase
+.firebase/
+firebase-debug.log
+serviceAccountKey.json
