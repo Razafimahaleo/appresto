@@ -6,6 +6,7 @@ import {
   getDoc,
   onSnapshot,
   updateDoc,
+  deleteDoc,
   query,
   orderBy,
   where,
@@ -99,4 +100,58 @@ export const updateOrderStatus = async (
 export const getMenus = async (): Promise<MenuItem[]> => {
   const snapshot = await getDocs(collection(db, MENUS_PATH));
   return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as MenuItem[];
+};
+
+// CRUD Menus
+export const createMenu = async (menu: Omit<MenuItem, 'id'>): Promise<string> => {
+  try {
+    const menuData = {
+      name: menu.name,
+      description: menu.description || '',
+      price: menu.price,
+      category: menu.category,
+      isAvailable: menu.isAvailable ?? true,
+      isPromo: menu.isPromo || false,
+      promoPrice: menu.promoPrice || null,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+    };
+    const docRef = await addDoc(collection(db, MENUS_PATH), menuData);
+    return docRef.id;
+  } catch (error) {
+    console.error('Erreur createMenu:', error);
+    throw error;
+  }
+};
+
+export const updateMenu = async (menuId: string, updates: Partial<MenuItem>): Promise<void> => {
+  try {
+    const updateData: Record<string, unknown> = {
+      updatedAt: Timestamp.now(),
+    };
+    
+    if (updates.name !== undefined) updateData.name = updates.name;
+    if (updates.description !== undefined) updateData.description = updates.description;
+    if (updates.price !== undefined) updateData.price = updates.price;
+    if (updates.category !== undefined) updateData.category = updates.category;
+    if (updates.isAvailable !== undefined) updateData.isAvailable = updates.isAvailable;
+    if (updates.isPromo !== undefined) updateData.isPromo = updates.isPromo;
+    if (updates.promoPrice !== undefined) {
+      updateData.promoPrice = updates.promoPrice || null;
+    }
+    
+    await updateDoc(doc(db, MENUS_PATH, menuId), updateData);
+  } catch (error) {
+    console.error('Erreur updateMenu:', error);
+    throw error;
+  }
+};
+
+export const deleteMenu = async (menuId: string): Promise<void> => {
+  try {
+    await deleteDoc(doc(db, MENUS_PATH, menuId));
+  } catch (error) {
+    console.error('Erreur deleteMenu:', error);
+    throw error;
+  }
 };

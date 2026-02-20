@@ -20,12 +20,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = subscribeToAuth((authUser) => {
-      setUser(authUser);
-      if (!authUser) setRole(null);
+    try {
+      const unsub = subscribeToAuth((authUser) => {
+        setUser(authUser);
+        if (!authUser) setRole(null);
+        setIsLoading(false);
+      });
+      return unsub;
+    } catch (error) {
+      // Auth non disponible (normal pour interface Client)
       setIsLoading(false);
-    });
-    return unsub;
+      return () => {};
+    }
   }, []);
 
   return (

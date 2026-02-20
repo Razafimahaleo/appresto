@@ -1,0 +1,12 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // DEV uniquement: ouvert pour permettre l'upload d'images depuis la tablette caissière.
+    // En production, limiter à un rôle "cashier" (Auth) et valider le chemin.
+    match /{allPaths=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}
+

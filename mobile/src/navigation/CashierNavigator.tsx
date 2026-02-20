@@ -2,11 +2,13 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import DashboardScreen from '../screens/Cashier/DashboardScreen';
 import MenuManagerScreen from '../screens/Cashier/MenuManagerScreen';
+import MenuFormScreen from '../screens/Cashier/MenuFormScreen';
 import ReadyOrdersScreen from '../screens/Cashier/ReadyOrdersScreen';
 
 export type CashierStackParamList = {
   Dashboard: undefined;
   MenuManager: undefined;
+  MenuForm: { menuId?: string };
   ReadyOrders: undefined;
 };
 
@@ -24,6 +26,13 @@ export default function CashierNavigator() {
         name="MenuManager"
         component={MenuManagerScreen}
         options={{ title: 'Gestion des menus' }}
+      />
+      <Stack.Screen
+        name="MenuForm"
+        component={MenuFormScreen}
+        options={({ route }) => ({
+          title: route.params?.menuId ? 'Modifier le menu' : 'Nouveau menu',
+        })}
       />
       <Stack.Screen
         name="ReadyOrders"

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { theme } from '../../constants/theme';
 import type { MenuItem as MenuItemType } from '../../types';
 
@@ -14,6 +14,9 @@ export default function MenuItem({ item, onAdd, disabled }: MenuItemProps) {
 
   return (
     <View style={[styles.container, disabled && styles.disabled]}>
+      {item.image ? (
+        <Image source={{ uri: item.image }} style={styles.image} />
+      ) : null}
       <View style={styles.content}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.description} numberOfLines={2}>
@@ -48,6 +51,13 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.sm,
     padding: theme.spacing.md,
     marginBottom: theme.spacing.sm,
+  },
+  image: {
+    width: '100%',
+    height: 120,
+    borderRadius: theme.borderRadius.sm,
+    marginBottom: theme.spacing.sm,
+    backgroundColor: '#eee',
   },
   disabled: { opacity: 0.6 },
   content: { flex: 1 },
