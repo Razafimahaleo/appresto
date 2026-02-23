@@ -40,7 +40,7 @@ export default function MenuFormScreen() {
   const [loading, setLoading] = useState(!!menuId);
   const [saving, setSaving] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
-  const [imageUri, setImageUri] = useState<string | null>(null);
+  const [imageAsset, setImageAsset] = useState<{ uri: string; base64: string; mimeType: string } | null>(null);
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
@@ -88,14 +88,24 @@ export default function MenuFormScreen() {
       return;
     }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      quality: 0.8,
-    });
+  const result = await ImagePicker.launchImageLibraryAsync({
+  mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  allowsEditing: true,
+  quality: 0.8,
+  base64: true,
+});
 
-    if (!result.canceled && result.assets?.[0]?.uri) {
-      setImageUri(result.assets[0].uri);
+    if (!result.canceled && result.assets?.[0]) {
+      const asset = result.assets[0];
+      if (!asset.base64) {
+        Alert.alert('Erreur', "Impossible de lire l'image. Réessayez.");
+        return;
+      }
+      setImageAsset({
+        uri: asset.uri,
+        base64: asset.base64,
+        mimeType: asset.mimeType ?? 'image/jpeg',
+      });
     }
   };
 
@@ -129,11 +139,12 @@ export default function MenuFormScreen() {
       if (menuId) {
         // Upload image si modifiée
         let nextImageUrl = existingImageUrl;
-        if (imageUri) {
+        if (imageAsset) {
           nextImageUrl = await uploadMenuImage({
             restaurantId: RESTAURANT_ID,
             menuId,
-            imageUri,
+            base64: imageAsset.base64,
+            mimeType: imageAsset.mimeType,
           });
         }
         await updateMenu(menuId, { ...menuData, image: nextImageUrl ?? undefined });
@@ -144,11 +155,12 @@ export default function MenuFormScreen() {
         // 1) créer le menu (sans image), 2) uploader image, 3) update le menu avec l'URL
         const newMenuId = await createMenu(menuData);
         let nextImageUrl: string | null = null;
-        if (imageUri) {
+        if (imageAsset) {
           nextImageUrl = await uploadMenuImage({
             restaurantId: RESTAURANT_ID,
             menuId: newMenuId,
-            imageUri,
+            base64: imageAsset.base64,
+            mimeType: imageAsset.mimeType,
           });
           await updateMenu(newMenuId, { image: nextImageUrl });
         }
@@ -177,9 +189,9 @@ export default function MenuFormScreen() {
       <View style={styles.form}>
         <Text style={styles.label}>Image</Text>
         <View style={styles.imageRow}>
-          {(imageUri || existingImageUrl) ? (
+          {(imageAsset || existingImageUrl) ? (
             <Image
-              source={{ uri: imageUri ?? existingImageUrl ?? undefined }}
+              source={{ uri: imageAsset?.uri ?? existingImageUrl ?? undefined }}
               style={styles.imagePreview}
             />
           ) : (
@@ -189,14 +201,14 @@ export default function MenuFormScreen() {
           )}
           <View style={styles.imageButtons}>
             <Button title="Choisir" onPress={pickImage} variant="outline" fullWidth />
-            {(imageUri || existingImageUrl) ? (
+            {(imageAsset || existingImageUrl) ? (
               <View style={{ height: theme.spacing.sm }} />
             ) : null}
-            {(imageUri || existingImageUrl) ? (
+            {(imageAsset || existingImageUrl) ? (
               <Button
                 title="Retirer"
                 onPress={() => {
-                  setImageUri(null);
+                  setImageAsset(null);
                   setExistingImageUrl(null);
                 }}
                 variant="secondary"
