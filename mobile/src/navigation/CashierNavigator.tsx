@@ -4,12 +4,16 @@ import DashboardScreen from '../screens/Cashier/DashboardScreen';
 import MenuManagerScreen from '../screens/Cashier/MenuManagerScreen';
 import MenuFormScreen from '../screens/Cashier/MenuFormScreen';
 import ReadyOrdersScreen from '../screens/Cashier/ReadyOrdersScreen';
+import ReleaseTableScreen from '../screens/Cashier/ReleaseTableScreen';
+import TablesManagerScreen from '../screens/Cashier/TablesManagerScreen';
 
 export type CashierStackParamList = {
   Dashboard: undefined;
   MenuManager: undefined;
   MenuForm: { menuId?: string };
   ReadyOrders: undefined;
+  ReleaseTable: undefined;
+  TablesManager: undefined;
 };
 
 const Stack = createNativeStackNavigator<CashierStackParamList>();
@@ -38,6 +42,16 @@ export default function CashierNavigator() {
         name="ReadyOrders"
         component={ReadyOrdersScreen}
         options={{ title: 'Plats prêts' }}
+      />
+      <Stack.Screen
+        name="ReleaseTable"
+        component={ReleaseTableScreen}
+        options={{ title: 'Libérer une table' }}
+      />
+      <Stack.Screen
+        name="TablesManager"
+        component={TablesManagerScreen}
+        options={{ title: 'Gestion des tables' }}
       />
     </Stack.Navigator>
   );

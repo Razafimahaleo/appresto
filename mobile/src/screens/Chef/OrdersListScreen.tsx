@@ -10,6 +10,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { subscribeToOrders } from '../../services/firestore';
 import OrderCard from '../../components/chef/OrderCard';
+import { ChatFab, ChatModal } from '../Shared/ChatScreen';
 import type { Order } from '../../types';
 import type { ChefStackParamList } from '../../navigation/ChefNavigator';
 import { theme } from '../../constants/theme';
@@ -20,6 +21,7 @@ export default function OrdersListScreen() {
   const nav = useNavigation<NavProp>();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [chatOpen, setChatOpen] = useState(false);
 
   useEffect(() => {
     const unsub = subscribeToOrders((data) => {
@@ -53,6 +55,12 @@ export default function OrdersListScreen() {
           <Text style={styles.empty}>Aucune commande</Text>
         }
         contentContainerStyle={styles.list}
+      />
+      <ChatFab onPress={() => setChatOpen(true)} />
+      <ChatModal
+        visible={chatOpen}
+        onClose={() => setChatOpen(false)}
+        sender="chef"
       />
     </View>
   );

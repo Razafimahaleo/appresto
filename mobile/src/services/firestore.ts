@@ -1,6 +1,7 @@
 import {
   collection,
   doc,
+  setDoc,
   addDoc,
   getDocs,
   getDoc,
@@ -18,6 +19,25 @@ import type { Order, OrderItem, MenuItem } from '../types';
 const RESTAURANT_ID = 'default';
 const ORDERS_PATH = `restaurants/${RESTAURANT_ID}/orders`;
 const MENUS_PATH = `restaurants/${RESTAURANT_ID}/menus`;
+const TABLE_LOCKS_PATH = `restaurants/${RESTAURANT_ID}/tableLocks`;
+const TABLES_LIST_DOC = doc(
+  db,
+  'restaurants',
+  RESTAURANT_ID,
+  'config',
+  'tablesList'
+);
+const CHAT_PATH = `restaurants/${RESTAURANT_ID}/chat`;
+
+export type TableItem = { id: string; name: string };
+
+export type ChatSender = 'chef' | 'cashier';
+export interface ChatMessage {
+  id: string;
+  sender: ChatSender;
+  text: string;
+  createdAt: Date | { seconds: number };
+}
 
 export const createOrder = async (
   tableId: string,
@@ -95,6 +115,111 @@ export const updateOrderStatus = async (
     updates.deliveredAt = Timestamp.now();
   }
   await updateDoc(doc(db, ORDERS_PATH, orderId), updates);
+};
+
+// Table lock (code verrouillage)
+export const setTableLock = async (
+  tableId: string,
+  code: string
+): Promise<void> => {
+  await setDoc(doc(db, TABLE_LOCKS_PATH, tableId), { code });
+};
+
+export const getTableLock = async (
+  tableId: string
+): Promise<string | null> => {
+  const snap = await getDoc(doc(db, TABLE_LOCKS_PATH, tableId));
+  const data = snap.data();
+  return data?.code ?? null;
+};
+
+export const clearTableLock = async (tableId: string): Promise<void> => {
+  await deleteDoc(doc(db, TABLE_LOCKS_PATH, tableId));
+};
+
+export const subscribeToTableLocks = (
+  callback: (tableIdsWithLock: Set<string>) => void
+) => {
+  return onSnapshot(collection(db, TABLE_LOCKS_PATH), (snapshot) => {
+    const set = new Set<string>();
+    snapshot.docs.forEach((d) => set.add(d.id));
+    callback(set);
+  });
+};
+
+// Liste des tables du resto (caissière : ajout/suppression)
+export const subscribeToTablesList = (
+  callback: (tables: TableItem[]) => void
+) => {
+  return onSnapshot(TABLES_LIST_DOC, (snap) => {
+    const data = snap.data();
+    const list = Array.isArray(data?.list) ? data.list : [];
+    callback(list as TableItem[]);
+  });
+};
+
+export const setTablesList = async (
+  tables: TableItem[]
+): Promise<void> => {
+  await setDoc(TABLES_LIST_DOC, { list: tables });
+};
+
+export const addTable = async (name: string): Promise<string> => {
+  const snap = await getDoc(TABLES_LIST_DOC);
+  const data = snap.data();
+  const list = (Array.isArray(data?.list) ? data.list : []) as TableItem[];
+  const maxId = list.reduce((m, t) => {
+    const n = parseInt(t.id, 10);
+    return Number.isNaN(n) ? m : Math.max(m, n);
+  }, 0);
+  const id = String(maxId + 1);
+  await setDoc(TABLES_LIST_DOC, {
+    list: [...list, { id, name: name.trim() || id }],
+  });
+  return id;
+};
+
+export const removeTable = async (tableId: string): Promise<void> => {
+  const snap = await getDoc(TABLES_LIST_DOC);
+  const data = snap.data();
+  const list = (Array.isArray(data?.list) ? data.list : []) as TableItem[];
+  const next = list.filter((t) => t.id !== tableId);
+  await setDoc(TABLES_LIST_DOC, { list: next });
+};
+
+// Chat chef ↔ caissière
+export const sendChatMessage = async (
+  sender: ChatSender,
+  text: string
+): Promise<void> => {
+  const trimmed = text.trim();
+  if (!trimmed) return;
+  await addDoc(collection(db, CHAT_PATH), {
+    sender,
+    text: trimmed,
+    createdAt: Timestamp.now(),
+  });
+};
+
+export const subscribeToChatMessages = (
+  callback: (messages: ChatMessage[]) => void
+) => {
+  const q = query(
+    collection(db, CHAT_PATH),
+    orderBy('createdAt', 'asc')
+  );
+  return onSnapshot(q, (snapshot) => {
+    const messages = snapshot.docs.map((d) => {
+      const data = d.data();
+      return {
+        id: d.id,
+        sender: data.sender as ChatSender,
+        text: data.text,
+        createdAt: data.createdAt?.toDate?.() ?? data.createdAt,
+      };
+    }) as ChatMessage[];
+    callback(messages);
+  });
 };
 
 export const getMenus = async (): Promise<MenuItem[]> => {

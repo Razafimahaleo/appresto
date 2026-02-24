@@ -18,10 +18,12 @@ export default function ReadyOrdersScreen() {
     return unsub;
   }, []);
 
-  const handleDelivered = async (orderId: string) => {
-    setUpdating(orderId);
+  const handleDelivered = async (order: Order) => {
+    setUpdating(order.id);
     try {
-      await updateOrderStatus(orderId, 'delivered');
+      await updateOrderStatus(order.id, 'delivered');
+    } catch (err) {
+      console.error('Servi failed:', err);
     } finally {
       setUpdating(null);
     }
@@ -51,7 +53,7 @@ export default function ReadyOrdersScreen() {
             </View>
             <Button
               title="Servi"
-              onPress={() => handleDelivered(item.id)}
+              onPress={() => handleDelivered(item)}
               loading={updating === item.id}
               variant="secondary"
             />

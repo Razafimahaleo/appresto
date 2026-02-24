@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { CashierStackParamList } from '../../navigation/CashierNavigator';
 import { theme } from '../../constants/theme';
+import { ChatFab, ChatModal } from '../Shared/ChatScreen';
 
 type NavProp = NativeStackNavigationProp<CashierStackParamList, 'Dashboard'>;
 
 export default function DashboardScreen() {
   const nav = useNavigation<NavProp>();
+  const [chatOpen, setChatOpen] = useState(false);
 
   return (
     <View style={styles.container}>
@@ -28,6 +30,28 @@ export default function DashboardScreen() {
         <Text style={styles.cardTitle}>Plats prêts</Text>
         <Text style={styles.cardDesc}>À servir aux tables</Text>
       </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => nav.navigate('ReleaseTable')}
+      >
+        <Text style={styles.emoji}>🪑</Text>
+        <Text style={styles.cardTitle}>Libérer une table</Text>
+        <Text style={styles.cardDesc}>Clients partis → table à nouveau libre</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => nav.navigate('TablesManager')}
+      >
+        <Text style={styles.emoji}>⊞</Text>
+        <Text style={styles.cardTitle}>Gestion des tables</Text>
+        <Text style={styles.cardDesc}>Ajouter ou supprimer des tables</Text>
+      </TouchableOpacity>
+      <ChatFab onPress={() => setChatOpen(true)} />
+      <ChatModal
+        visible={chatOpen}
+        onClose={() => setChatOpen(false)}
+        sender="cashier"
+      />
     </View>
   );
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { theme } from '../constants/theme';
@@ -7,12 +7,25 @@ import type { RootStackParamList } from '../navigation/AppNavigator';
 
 type NavProp = NativeStackNavigationProp<RootStackParamList, 'RoleSelection'>;
 
+function Logo() {
+  return (
+    <Image
+      source={require('../../assets/logoCE.png')}
+      style={styles.logo}
+      resizeMode="contain"
+    />
+  );
+}
+
 export default function RoleSelectionScreen() {
   const nav = useNavigation<NavProp>();
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>AppResto</Text>
+      <View style={styles.logoContainer}>
+        <Logo />
+      </View>
+      <Text style={styles.title}>click-and-eat</Text>
       <Text style={styles.subtitle}>Choisissez votre interface</Text>
       <View style={styles.buttons}>
         <TouchableOpacity
@@ -51,6 +64,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: theme.colors.background,
     padding: theme.spacing.xl,
+  },
+  logoContainer: {
+    marginBottom: theme.spacing.md,
+  },
+  logo: {
+    width: 120,
+    height: 120,
+  },
+  logoPlaceholder: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: theme.colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  logoPlaceholderIcon: {
+    fontSize: 56,
   },
   title: {
     fontSize: 36,

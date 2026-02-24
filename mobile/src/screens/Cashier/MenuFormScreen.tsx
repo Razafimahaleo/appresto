@@ -82,30 +82,37 @@ export default function MenuFormScreen() {
   };
 
   const pickImage = async () => {
-    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!perm.granted) {
-      Alert.alert('Permission requise', 'Autorisez l’accès à la galerie pour choisir une image.');
-      return;
-    }
-
-  const result = await ImagePicker.launchImageLibraryAsync({
-  mediaTypes: ImagePicker.MediaTypeOptions.Images,
-  allowsEditing: true,
-  quality: 0.8,
-  base64: true,
-});
-
-    if (!result.canceled && result.assets?.[0]) {
-      const asset = result.assets[0];
-      if (!asset.base64) {
-        Alert.alert('Erreur', "Impossible de lire l'image. Réessayez.");
+    try {
+      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!perm.granted) {
+        Alert.alert(
+          'Permission requise',
+          'Autorisez l’accès à la galerie dans les paramètres pour choisir une image.'
+        );
         return;
       }
-      setImageAsset({
-        uri: asset.uri,
-        base64: asset.base64,
-        mimeType: asset.mimeType ?? 'image/jpeg',
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
       });
+
+      if (!result.canceled && result.assets?.[0]) {
+        const asset = result.assets[0];
+        setImageAsset({
+          uri: asset.uri,
+          base64: '',
+          mimeType: asset.mimeType ?? 'image/jpeg',
+        });
+      }
+    } catch (error) {
+      console.error('pickImage error:', error);
+      Alert.alert(
+        'Erreur',
+        "Impossible d'ouvrir la galerie. Vérifiez les permissions ou réessayez."
+      );
     }
   };
 
@@ -143,7 +150,7 @@ export default function MenuFormScreen() {
           nextImageUrl = await uploadMenuImage({
             restaurantId: RESTAURANT_ID,
             menuId,
-            base64: imageAsset.base64,
+            imageUri: imageAsset.uri,
             mimeType: imageAsset.mimeType,
           });
         }
@@ -159,7 +166,7 @@ export default function MenuFormScreen() {
           nextImageUrl = await uploadMenuImage({
             restaurantId: RESTAURANT_ID,
             menuId: newMenuId,
-            base64: imageAsset.base64,
+            imageUri: imageAsset.uri,
             mimeType: imageAsset.mimeType,
           });
           await updateMenu(newMenuId, { image: nextImageUrl });
@@ -170,7 +177,14 @@ export default function MenuFormScreen() {
       }
     } catch (error) {
       console.error('Erreur lors de la sauvegarde:', error);
-      Alert.alert('Erreur', `Impossible de sauvegarder le menu: ${error instanceof Error ? error.message : 'Erreur inconnue'}`);
+      const message = error instanceof Error ? error.message : 'Erreur inconnue';
+      const isNetworkError = message.includes('Network request failed') || message.includes('Failed to fetch');
+      Alert.alert(
+        'Erreur',
+        isNetworkError
+          ? 'Impossible de joindre le serveur. Sur téléphone : ajoute dans mobile/.env la ligne EXPO_PUBLIC_API_URL=http://IP_DE_TON_PC:3000 (ex: http://192.168.1.10:3000), lance le backend sur le PC, puis redémarre Expo.'
+          : `Impossible de sauvegarder le menu: ${message}`
+      );
     } finally {
       setSaving(false);
     }

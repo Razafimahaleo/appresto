@@ -20,6 +20,7 @@ module.exports = {
       firebaseStorageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
       firebaseMessagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
       firebaseAppId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+      apiUrl: process.env.EXPO_PUBLIC_API_URL,
     },
     ios: {
       supportsTablet: true,
@@ -31,6 +32,7 @@ module.exports = {
         backgroundColor: '#1a472a',
       },
       package: 'com.appresto.client',
+      usesCleartextTraffic: true,
     },
   },
 };

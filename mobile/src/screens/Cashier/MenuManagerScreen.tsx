@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
+  ScrollView,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -17,12 +18,25 @@ import type { MenuItem } from '../../types';
 import type { CashierStackParamList } from '../../navigation/CashierNavigator';
 import { theme } from '../../constants/theme';
 
+const ALL_CATEGORIES = 'Tout';
+
 type NavProp = NativeStackNavigationProp<CashierStackParamList, 'MenuManager'>;
 
 export default function MenuManagerScreen() {
   const nav = useNavigation<NavProp>();
   const [menus, setMenus] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCategory, setSelectedCategory] = useState<string>(ALL_CATEGORIES);
+
+  const categories = useMemo(() => {
+    const cats = new Set(menus.map((m) => m.category).filter(Boolean));
+    return [ALL_CATEGORIES, ...Array.from(cats).sort()];
+  }, [menus]);
+
+  const filteredMenus = useMemo(() => {
+    if (selectedCategory === ALL_CATEGORIES) return menus;
+    return menus.filter((m) => m.category === selectedCategory);
+  }, [menus, selectedCategory]);
 
   useEffect(() => {
     const unsub = subscribeToMenus((data) => {
@@ -69,8 +83,34 @@ export default function MenuManagerScreen() {
         fullWidth
         style={styles.addButton}
       />
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={styles.categoryBar}
+        contentContainerStyle={styles.categoryBarContent}
+      >
+        {categories.map((cat) => (
+          <TouchableOpacity
+            key={cat}
+            style={[
+              styles.categoryChip,
+              selectedCategory === cat && styles.categoryChipSelected,
+            ]}
+            onPress={() => setSelectedCategory(cat)}
+          >
+            <Text
+              style={[
+                styles.categoryChipText,
+                selectedCategory === cat && styles.categoryChipTextSelected,
+              ]}
+            >
+              {cat}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
       <FlatList
-        data={menus}
+        data={filteredMenus}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <Card style={styles.menuCard}>
@@ -110,7 +150,11 @@ export default function MenuManagerScreen() {
           </Card>
         )}
         ListEmptyComponent={
-          <Text style={styles.empty}>Aucun menu. Cliquez sur "Ajouter un menu" pour commencer.</Text>
+          <Text style={styles.empty}>
+            {selectedCategory === ALL_CATEGORIES
+              ? 'Aucun menu. Cliquez sur "Ajouter un menu" pour commencer.'
+              : 'Aucun menu dans cette catégorie.'}
+          </Text>
         }
       />
     </View>
@@ -131,6 +175,34 @@ const styles = StyleSheet.create({
   },
   addButton: {
     marginBottom: theme.spacing.md,
+  },
+  categoryBar: {
+    marginBottom: theme.spacing.sm,
+  },
+  categoryBarContent: {
+    paddingVertical: theme.spacing.xs,
+    paddingRight: theme.spacing.md,
+  },
+  categoryChip: {
+    marginRight: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    borderRadius: theme.borderRadius.lg,
+    backgroundColor: '#0ea5e9',
+    borderWidth: 1,
+    borderColor: '#0ea5e9',
+  },
+  categoryChipSelected: {
+    backgroundColor: theme.colors.primary,
+    borderColor: theme.colors.primary,
+  },
+  categoryChipText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
+  },
+  categoryChipTextSelected: {
+    color: '#fff',
   },
   menuCard: {
     marginBottom: theme.spacing.sm,

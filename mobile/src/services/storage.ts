@@ -1,27 +1,54 @@
-import { ref, uploadString, getDownloadURL } from 'firebase/storage';
-import { storage } from '../config/firebase';
+import { readAsStringAsync } from 'expo-file-system/legacy';
+import { EncodingType } from 'expo-file-system/legacy';
+import Constants from 'expo-constants';
+
+const API_URL =
+  Constants.expoConfig?.extra?.apiUrl ??
+  process.env.EXPO_PUBLIC_API_URL ??
+  'http://localhost:3000';
 
 /**
- * Upload une image vers Firebase Storage à partir de sa base64 (data URL).
- * Cette méthode est la plus fiable sur Expo Go car elle ne dépend d'aucun
- * accès fichier natif — le SDK Firebase JS sait traiter les data URL directement.
- *
- * @param base64 - La base64 de l'image (sans le préfixe "data:image/...;base64,")
- * @param mimeType - Le type MIME de l'image (ex: "image/jpeg")
+ * Upload une image via le backend (évite Blob / ArrayBuffer non supportés en React Native).
+ * Lit l'image en base64 puis envoie au backend qui upload vers Firebase Storage.
  */
 export async function uploadMenuImage(params: {
   restaurantId: string;
   menuId: string;
-  base64: string;
+  base64?: string;
+  imageUri?: string;
   mimeType?: string;
 }): Promise<string> {
-  const { restaurantId, menuId, base64, mimeType = 'image/jpeg' } = params;
+  const { menuId, mimeType = 'image/jpeg' } = params;
 
-  const dataUrl = `data:${mimeType};base64,${base64}`;
-  const objectPath = `restaurants/${restaurantId}/menus/${menuId}/image.jpg`;
-  const objectRef = ref(storage, objectPath);
+  let rawBase64: string;
 
-  await uploadString(objectRef, dataUrl, 'data_url');
+  if (params.imageUri) {
+    rawBase64 = await readAsStringAsync(params.imageUri, {
+      encoding: EncodingType.Base64,
+    });
+  } else if (params.base64) {
+    rawBase64 = params.base64
+      .replace(/^data:image\/\w+;base64,/, '')
+      .replace(/\s/g, '');
+  } else {
+    throw new Error('Fournir base64 ou imageUri');
+  }
 
-  return await getDownloadURL(objectRef);
+  const res = await fetch(`${API_URL}/api/upload/menu-image`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ base64: rawBase64, menuId, mimeType }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || `Upload échoué (${res.status})`);
+  }
+
+  const data = (await res.json()) as { url: string };
+  return data.url;
+}
+
+export function getApiUrl(): string {
+  return API_URL;
 }

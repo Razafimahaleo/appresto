@@ -19,6 +19,9 @@ export default function MenuItem({ item, onAdd, disabled }: MenuItemProps) {
       ) : null}
       <View style={styles.content}>
         <Text style={styles.name}>{item.name}</Text>
+        {item.category ? (
+          <Text style={styles.category}>{item.category}</Text>
+        ) : null}
         <Text style={styles.description} numberOfLines={2}>
           {item.description}
         </Text>
@@ -62,6 +65,12 @@ const styles = StyleSheet.create({
   disabled: { opacity: 0.6 },
   content: { flex: 1 },
   name: { fontSize: 16, fontWeight: '600', color: theme.colors.text },
+  category: {
+    fontSize: 12,
+    color: theme.colors.primary,
+    marginTop: 2,
+    fontStyle: 'italic',
+  },
   description: {
     fontSize: 14,
     color: theme.colors.textSecondary,

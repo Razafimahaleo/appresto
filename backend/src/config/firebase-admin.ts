@@ -16,3 +16,4 @@ const initializeFirebase = () => {
 
 export const adminDb = initializeFirebase().firestore();
 export const adminAuth = initializeFirebase().auth();
+export const adminStorage = initializeFirebase().storage();
