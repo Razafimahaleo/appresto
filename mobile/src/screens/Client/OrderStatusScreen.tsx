@@ -111,8 +111,11 @@ const styles = StyleSheet.create({
   },
   orderCard: {
     backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.md,
+    borderRadius: theme.borderRadius.lg,
     padding: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    ...theme.shadows.sm,
   },
   orderHeader: {
     flexDirection: 'row',
@@ -145,7 +148,7 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.lg,
     paddingTop: theme.spacing.md,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: theme.colors.border,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',

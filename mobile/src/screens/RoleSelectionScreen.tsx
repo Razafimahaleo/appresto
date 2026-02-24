@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { theme } from '../constants/theme';
+import { useStaff } from '../contexts/StaffContext';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 
 type NavProp = NativeStackNavigationProp<RootStackParamList, 'RoleSelection'>;
@@ -19,18 +20,25 @@ function Logo() {
 
 export default function RoleSelectionScreen() {
   const nav = useNavigation<NavProp>();
+  const { clearStaff } = useStaff();
+
+  useFocusEffect(
+    useCallback(() => {
+      clearStaff();
+    }, [clearStaff])
+  );
 
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
         <Logo />
       </View>
-      <Text style={styles.title}>click-and-eat</Text>
       <Text style={styles.subtitle}>Choisissez votre interface</Text>
       <View style={styles.buttons}>
         <TouchableOpacity
           style={styles.card}
           onPress={() => nav.navigate('Client')}
+          activeOpacity={0.85}
         >
           <Text style={styles.emoji}>🍽️</Text>
           <Text style={styles.cardTitle}>Client</Text>
@@ -38,7 +46,8 @@ export default function RoleSelectionScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.card}
-          onPress={() => nav.navigate('Chef')}
+          onPress={() => nav.navigate('StaffPin', { role: 'chef' })}
+          activeOpacity={0.85}
         >
           <Text style={styles.emoji}>👨‍🍳</Text>
           <Text style={styles.cardTitle}>Chef</Text>
@@ -46,7 +55,8 @@ export default function RoleSelectionScreen() {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.card}
-          onPress={() => nav.navigate('Cashier')}
+          onPress={() => nav.navigate('StaffPin', { role: 'cashier' })}
+          activeOpacity={0.85}
         >
           <Text style={styles.emoji}>💳</Text>
           <Text style={styles.cardTitle}>Caissière</Text>
@@ -69,8 +79,8 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
   },
   logo: {
-    width: 120,
-    height: 120,
+    width: 180,
+    height: 180,
   },
   logoPlaceholder: {
     width: 120,
@@ -88,12 +98,6 @@ const styles = StyleSheet.create({
   logoPlaceholderIcon: {
     fontSize: 56,
   },
-  title: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: theme.colors.primary,
-    marginBottom: theme.spacing.xs,
-  },
   subtitle: {
     fontSize: 18,
     color: theme.colors.textSecondary,
@@ -107,15 +111,14 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.lg,
+    borderRadius: theme.borderRadius.xl,
     padding: theme.spacing.xl,
     width: 180,
+    minWidth: 160,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    ...theme.shadows.md,
   },
   emoji: { fontSize: 48, marginBottom: theme.spacing.sm },
   cardTitle: { fontSize: 20, fontWeight: '700', color: theme.colors.text },

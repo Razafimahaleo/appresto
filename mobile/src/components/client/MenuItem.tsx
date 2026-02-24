@@ -51,16 +51,19 @@ export default function MenuItem({ item, onAdd, disabled }: MenuItemProps) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.sm,
+    borderRadius: theme.borderRadius.lg,
     padding: theme.spacing.md,
     marginBottom: theme.spacing.sm,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    ...theme.shadows.sm,
   },
   image: {
     width: '100%',
     height: 120,
-    borderRadius: theme.borderRadius.sm,
+    borderRadius: theme.borderRadius.md,
     marginBottom: theme.spacing.sm,
-    backgroundColor: '#eee',
+    backgroundColor: theme.colors.border,
   },
   disabled: { opacity: 0.6 },
   content: { flex: 1 },
@@ -91,7 +94,7 @@ const styles = StyleSheet.create({
   addBtn: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: theme.borderRadius.lg,
     backgroundColor: theme.colors.primary,
     alignItems: 'center',
     justifyContent: 'center',

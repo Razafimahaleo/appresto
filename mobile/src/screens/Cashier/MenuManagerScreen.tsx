@@ -188,9 +188,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.sm,
     borderRadius: theme.borderRadius.lg,
-    backgroundColor: '#0ea5e9',
+    backgroundColor: theme.colors.primaryLight,
     borderWidth: 1,
-    borderColor: '#0ea5e9',
+    borderColor: theme.colors.primary,
   },
   categoryChipSelected: {
     backgroundColor: theme.colors.primary,

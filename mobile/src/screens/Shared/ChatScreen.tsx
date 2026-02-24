@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
+  ScrollView,
   TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
@@ -20,8 +20,11 @@ import {
 } from '../../services/firestore';
 import { theme } from '../../constants/theme';
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-const MODAL_HEIGHT = Math.min(SCREEN_HEIGHT * 0.7, 500);
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const MODAL_HEIGHT = Math.min(Math.max(SCREEN_WIDTH, SCREEN_HEIGHT) * 0.5, 400);
+const HEADER_HEIGHT = 48;
+const INPUT_ROW_HEIGHT = 60;
+const LIST_HEIGHT = Math.max(180, MODAL_HEIGHT - HEADER_HEIGHT - INPUT_ROW_HEIGHT);
 
 type ChatRouteParams = { sender: ChatSender };
 
@@ -45,15 +48,13 @@ export function ChatModal({ visible, onClose, sender }: ChatModalProps) {
       animationType="slide"
       onRequestClose={onClose}
     >
-      <TouchableOpacity
-        style={styles.modalOverlay}
-        activeOpacity={1}
-        onPress={onClose}
-      >
-        <View
-          style={[styles.modalBox, { height: MODAL_HEIGHT }]}
-          onStartShouldSetResponder={() => true}
-        >
+      <View style={styles.modalOverlay}>
+        <TouchableOpacity
+          style={StyleSheet.absoluteFill}
+          activeOpacity={1}
+          onPress={onClose}
+        />
+        <View style={[styles.modalBox, { height: MODAL_HEIGHT }]}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>
               {sender === 'chef' ? 'Discussion avec la caissière' : 'Discussion avec le chef'}
@@ -64,7 +65,7 @@ export function ChatModal({ visible, onClose, sender }: ChatModalProps) {
           </View>
           <ChatScreen sender={sender} />
         </View>
-      </TouchableOpacity>
+      </View>
     </Modal>
   );
 }
@@ -94,7 +95,7 @@ export default function ChatScreen({ sender }: ChatScreenProps) {
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
-  const flatListRef = useRef<FlatList>(null);
+  const scrollRef = useRef<ScrollView>(null);
 
   useEffect(() => {
     return subscribeToChatMessages(setMessages);
@@ -103,8 +104,8 @@ export default function ChatScreen({ sender }: ChatScreenProps) {
   useEffect(() => {
     if (messages.length > 0) {
       setTimeout(
-        () => flatListRef.current?.scrollToEnd({ animated: true }),
-        100
+        () => scrollRef.current?.scrollToEnd({ animated: true }),
+        150
       );
     }
   }, [messages.length]);
@@ -129,45 +130,51 @@ export default function ChatScreen({ sender }: ChatScreenProps) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={90}
     >
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        renderItem={({ item }) => {
-          const isMe = item.sender === sender;
-          return (
-            <View
-              style={[
-                styles.bubbleWrap,
-                isMe ? styles.bubbleWrapRight : styles.bubbleWrapLeft,
-              ]}
-            >
-              {!isMe && (
-                <Text style={styles.senderLabel}>{otherLabel}</Text>
-              )}
-              <View
-                style={[
-                  styles.bubble,
-                  isMe ? styles.bubbleMe : styles.bubbleOther,
-                ]}
-              >
-                <Text style={[styles.bubbleText, isMe && { color: '#fff' }]}>
-                  {item.text}
-                </Text>
-                <Text style={[styles.bubbleTime, isMe && { color: 'rgba(255,255,255,0.8)' }]}>
-                  {formatTime(item.createdAt)}
-                </Text>
-              </View>
-            </View>
-          );
-        }}
-        ListEmptyComponent={
+      <ScrollView
+        ref={scrollRef}
+        style={[styles.listWrapper, { height: LIST_HEIGHT }]}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={true}
+        nestedScrollEnabled={true}
+        keyboardShouldPersistTaps="handled"
+        bounces={true}
+      >
+        {messages.length === 0 ? (
           <Text style={styles.empty}>
             Aucun message. Démarrez la conversation avec {otherLabel}.
           </Text>
-        }
-      />
+        ) : (
+          messages.map((item) => {
+            const isMe = item.sender === sender;
+            return (
+              <View
+                key={item.id}
+                style={[
+                  styles.bubbleWrap,
+                  isMe ? styles.bubbleWrapRight : styles.bubbleWrapLeft,
+                ]}
+              >
+                {!isMe && (
+                  <Text style={styles.senderLabel}>{otherLabel}</Text>
+                )}
+                <View
+                  style={[
+                    styles.bubble,
+                    isMe ? styles.bubbleMe : styles.bubbleOther,
+                  ]}
+                >
+                  <Text style={[styles.bubbleText, isMe && { color: '#fff' }]}>
+                    {item.text}
+                  </Text>
+                  <Text style={[styles.bubbleTime, isMe && { color: 'rgba(255,255,255,0.8)' }]}>
+                    {formatTime(item.createdAt)}
+                  </Text>
+                </View>
+              </View>
+            );
+          })
+        )}
+      </ScrollView>
       <View style={styles.inputRow}>
         <TextInput
           style={styles.input}
@@ -198,9 +205,12 @@ const styles = StyleSheet.create({
   },
   modalBox: {
     backgroundColor: theme.colors.surface,
-    borderTopLeftRadius: theme.borderRadius.lg,
-    borderTopRightRadius: theme.borderRadius.lg,
+    borderTopLeftRadius: theme.borderRadius.xl,
+    borderTopRightRadius: theme.borderRadius.xl,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    ...theme.shadows.lg,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -209,7 +219,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: theme.colors.border,
     backgroundColor: theme.colors.background,
   },
   modalTitle: {
@@ -228,17 +238,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: theme.spacing.lg,
     right: theme.spacing.lg,
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
     backgroundColor: theme.colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
+    ...theme.shadows.lg,
   },
   fabIcon: {
     fontSize: 24,
@@ -246,10 +252,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+    minHeight: 0,
   },
-  list: {
+  listWrapper: {},
+  listContent: {
     padding: theme.spacing.md,
-    paddingBottom: theme.spacing.sm,
+    paddingBottom: theme.spacing.lg,
   },
   bubbleWrap: {
     marginBottom: theme.spacing.sm,
@@ -320,8 +328,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     paddingVertical: theme.spacing.sm,
     paddingHorizontal: theme.spacing.md,
-    borderRadius: theme.borderRadius.sm,
+    borderRadius: theme.borderRadius.lg,
     justifyContent: 'center',
+    ...theme.shadows.sm,
   },
   sendBtnDisabled: {
     opacity: 0.5,

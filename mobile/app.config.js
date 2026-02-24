@@ -10,7 +10,7 @@ module.exports = {
     splash: {
       image: './assets/splash.png',
       resizeMode: 'contain',
-      backgroundColor: '#1a472a',
+      backgroundColor: '#0d9488',
     },
     assetBundlePatterns: ['**/*'],
     extra: {
@@ -29,7 +29,7 @@ module.exports = {
     android: {
       adaptiveIcon: {
         foregroundImage: './assets/adaptive-icon.png',
-        backgroundColor: '#1a472a',
+        backgroundColor: '#0d9488',
       },
       package: 'com.appresto.client',
       usesCleartextTraffic: true,

@@ -309,17 +309,20 @@ const styles = StyleSheet.create({
   tableBtn: {
     width: 100,
     minHeight: 90,
-    borderRadius: theme.borderRadius.md,
+    borderRadius: theme.borderRadius.lg,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: theme.spacing.sm,
+    ...theme.shadows.sm,
   },
   tableBtnFree: {
     backgroundColor: theme.colors.primary,
+    borderWidth: 1,
+    borderColor: theme.colors.primaryDark,
   },
   tableBtnOccupied: {
     backgroundColor: theme.colors.textSecondary,
-    opacity: 0.7,
+    opacity: 0.8,
   },
   tableNum: { fontSize: 28, fontWeight: 'bold', color: '#fff' },
   tableStatus: {
@@ -368,10 +371,13 @@ const styles = StyleSheet.create({
   },
   modalBox: {
     backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.md,
+    borderRadius: theme.borderRadius.xl,
     padding: theme.spacing.lg,
     width: '100%',
     maxWidth: 340,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    ...theme.shadows.lg,
   },
   modalTitle: {
     fontSize: 18,
@@ -385,8 +391,8 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: theme.colors.textSecondary,
-    borderRadius: theme.borderRadius.sm,
+    borderColor: theme.colors.border,
+    borderRadius: theme.borderRadius.md,
     padding: theme.spacing.sm,
     fontSize: 18,
     marginBottom: theme.spacing.sm,

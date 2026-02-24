@@ -27,7 +27,22 @@ const TABLES_LIST_DOC = doc(
   'config',
   'tablesList'
 );
+const APP_CONFIG_DOC = doc(
+  db,
+  'restaurants',
+  RESTAURANT_ID,
+  'config',
+  'appConfig'
+);
+const STAFF_PROFILES_PATH = `restaurants/${RESTAURANT_ID}/staffProfiles`;
 const CHAT_PATH = `restaurants/${RESTAURANT_ID}/chat`;
+
+export type StaffProfile = {
+  id: string;
+  name: string;
+  pin: string;
+  role: 'chef' | 'cashier';
+};
 
 export type TableItem = { id: string; name: string };
 
@@ -135,6 +150,34 @@ export const getTableLock = async (
 
 export const clearTableLock = async (tableId: string): Promise<void> => {
   await deleteDoc(doc(db, TABLE_LOCKS_PATH, tableId));
+};
+
+/** PIN Chef ou Caissière (fallback si pas de profils). Lit appConfig. Défaut "1234". */
+export const getStaffPin = async (
+  role: 'chef' | 'cashier'
+): Promise<string> => {
+  const snap = await getDoc(APP_CONFIG_DOC);
+  const data = snap.data();
+  const key = role === 'chef' ? 'chefPin' : 'cashierPin';
+  const pin = data?.[key];
+  return typeof pin === 'string' && pin.length > 0 ? pin : '1234';
+};
+
+/** Liste des profils staff pour un rôle (name, pin, role). Utilisé pour la connexion par PIN. */
+export const getStaffProfiles = async (
+  role: 'chef' | 'cashier'
+): Promise<StaffProfile[]> => {
+  const q = query(
+    collection(db, STAFF_PROFILES_PATH),
+    where('role', '==', role)
+  );
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((d) => ({
+    id: d.id,
+    name: d.data().name ?? 'Staff',
+    pin: String(d.data().pin ?? ''),
+    role: d.data().role as 'chef' | 'cashier',
+  }));
 };
 
 export const subscribeToTableLocks = (

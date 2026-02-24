@@ -371,11 +371,11 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.sm,
+    borderRadius: theme.borderRadius.md,
     padding: theme.spacing.md,
     fontSize: 16,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: theme.colors.border,
   },
   imageRow: {
     flexDirection: 'row',
@@ -385,14 +385,14 @@ const styles = StyleSheet.create({
   imagePreview: {
     width: 120,
     height: 90,
-    borderRadius: theme.borderRadius.sm,
-    backgroundColor: '#eee',
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: theme.colors.border,
   },
   imagePlaceholder: {
     width: 120,
     height: 90,
-    borderRadius: theme.borderRadius.sm,
-    backgroundColor: '#eee',
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: theme.colors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -439,10 +439,13 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.md,
+    borderRadius: theme.borderRadius.xl,
     padding: theme.spacing.md,
     width: '80%',
     maxWidth: 400,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    ...theme.shadows.lg,
   },
   modalTitle: {
     fontSize: 18,
@@ -452,7 +455,7 @@ const styles = StyleSheet.create({
   },
   categoryOption: {
     padding: theme.spacing.md,
-    borderRadius: theme.borderRadius.sm,
+    borderRadius: theme.borderRadius.md,
     marginBottom: theme.spacing.xs,
   },
   categoryOptionSelected: {

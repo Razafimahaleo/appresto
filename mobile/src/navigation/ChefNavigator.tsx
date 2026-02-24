@@ -2,6 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import OrdersListScreen from '../screens/Chef/OrdersListScreen';
 import OrderDetailScreen from '../screens/Chef/OrderDetailScreen';
+import StaffHeaderBadge from '../components/common/StaffHeaderBadge';
 
 export type ChefStackParamList = {
   OrdersList: undefined;
@@ -12,7 +13,12 @@ const Stack = createNativeStackNavigator<ChefStackParamList>();
 
 export default function ChefNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: true }}>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: true,
+        headerRight: () => <StaffHeaderBadge />,
+      }}
+    >
       <Stack.Screen
         name="OrdersList"
         component={OrdersListScreen}

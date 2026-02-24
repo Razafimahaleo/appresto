@@ -47,15 +47,13 @@ export default function OrderCard({ order, onPress }: OrderCardProps) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.md,
+    borderRadius: theme.borderRadius.lg,
     padding: theme.spacing.md,
     margin: theme.spacing.sm,
     minWidth: 160,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    ...theme.shadows.md,
   },
   header: {
     flexDirection: 'row',
@@ -66,7 +64,7 @@ const styles = StyleSheet.create({
   badge: {
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 8,
+    borderRadius: theme.borderRadius.sm,
   },
   badgeText: { fontSize: 12, color: '#fff', fontWeight: '600' },
   items: { fontSize: 14, color: theme.colors.textSecondary, marginTop: 4 },

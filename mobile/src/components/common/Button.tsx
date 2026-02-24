@@ -46,10 +46,11 @@ export default function Button({
           opacity: disabled ? 0.6 : 1,
           width: fullWidth ? '100%' : undefined,
         },
+        !disabled && !loading && theme.shadows.sm,
       ]}
       onPress={onPress}
       disabled={disabled || loading}
-      activeOpacity={0.8}
+      activeOpacity={0.82}
     >
       {loading ? (
         <ActivityIndicator color={textColor} />
@@ -64,7 +65,7 @@ const styles = StyleSheet.create({
   btn: {
     paddingVertical: theme.spacing.md,
     paddingHorizontal: theme.spacing.lg,
-    borderRadius: theme.borderRadius.md,
+    borderRadius: theme.borderRadius.lg,
     alignItems: 'center',
     justifyContent: 'center',
   },

@@ -68,12 +68,15 @@ export default function CartSummary({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.md,
+    borderRadius: theme.borderRadius.lg,
     padding: theme.spacing.md,
     flex: 1,
     minWidth: 280,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    ...theme.shadows.md,
   },
-  title: { fontSize: 18, fontWeight: '600', marginBottom: theme.spacing.sm },
+  title: { fontSize: 18, fontWeight: '600', marginBottom: theme.spacing.sm, color: theme.colors.text },
   list: { flex: 1, maxHeight: 300 },
   row: {
     flexDirection: 'row',
@@ -108,6 +111,6 @@ const styles = StyleSheet.create({
   },
   itemName: { fontSize: 14, color: theme.colors.text, flex: 1 },
   itemPrice: { fontSize: 14, fontWeight: '600' },
-  footer: { marginTop: theme.spacing.md, paddingTop: theme.spacing.sm },
-  total: { fontSize: 18, fontWeight: '700', marginBottom: theme.spacing.sm },
+  footer: { marginTop: theme.spacing.md, paddingTop: theme.spacing.sm, borderTopWidth: 1, borderTopColor: theme.colors.border },
+  total: { fontSize: 18, fontWeight: '700', marginBottom: theme.spacing.sm, color: theme.colors.text },
 });

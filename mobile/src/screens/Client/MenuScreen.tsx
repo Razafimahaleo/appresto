@@ -205,9 +205,10 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.secondary,
     paddingVertical: theme.spacing.sm,
     paddingHorizontal: theme.spacing.md,
-    borderRadius: theme.borderRadius.md,
+    borderRadius: theme.borderRadius.lg,
     marginBottom: theme.spacing.sm,
     alignItems: 'center',
+    ...theme.shadows.sm,
   },
   orderStatusBtnText: {
     fontSize: 16,
@@ -224,9 +225,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.sm,
     borderRadius: theme.borderRadius.lg,
-    backgroundColor: '#0ea5e9',
+    backgroundColor: theme.colors.primaryLight,
     borderWidth: 1,
-    borderColor: '#0ea5e9',
+    borderColor: theme.colors.primary,
   },
   categoryChipSelected: {
     backgroundColor: theme.colors.primary,

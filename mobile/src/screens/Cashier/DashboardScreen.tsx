@@ -1,51 +1,88 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useEffect, useMemo } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { CashierStackParamList } from '../../navigation/CashierNavigator';
 import { theme } from '../../constants/theme';
 import { ChatFab, ChatModal } from '../Shared/ChatScreen';
+import { subscribeToOrders } from '../../services/firestore';
+import { computeDailyStats } from '../../utils/dailyStats';
+import type { Order } from '../../types';
 
 type NavProp = NativeStackNavigationProp<CashierStackParamList, 'Dashboard'>;
 
 export default function DashboardScreen() {
   const nav = useNavigation<NavProp>();
   const [chatOpen, setChatOpen] = useState(false);
+  const [orders, setOrders] = useState<Order[]>([]);
+
+  useEffect(() => {
+    return subscribeToOrders(setOrders);
+  }, []);
+
+  const stats = useMemo(() => computeDailyStats(orders), [orders]);
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => nav.navigate('MenuManager')}
-      >
-        <Text style={styles.emoji}>📋</Text>
-        <Text style={styles.cardTitle}>Gestion des menus</Text>
-        <Text style={styles.cardDesc}>CRUD, promotions</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => nav.navigate('ReadyOrders')}
-      >
-        <Text style={styles.emoji}>🔔</Text>
-        <Text style={styles.cardTitle}>Plats prêts</Text>
-        <Text style={styles.cardDesc}>À servir aux tables</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => nav.navigate('ReleaseTable')}
-      >
-        <Text style={styles.emoji}>🪑</Text>
-        <Text style={styles.cardTitle}>Libérer une table</Text>
-        <Text style={styles.cardDesc}>Clients partis → table à nouveau libre</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => nav.navigate('TablesManager')}
-      >
-        <Text style={styles.emoji}>⊞</Text>
-        <Text style={styles.cardTitle}>Gestion des tables</Text>
-        <Text style={styles.cardDesc}>Ajouter ou supprimer des tables</Text>
-      </TouchableOpacity>
+    <View style={styles.wrapper}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.container}>
+        <View style={styles.statsSection}>
+        <Text style={styles.statsTitle}>Statistiques du jour</Text>
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>{stats.revenue.toFixed(2)} €</Text>
+            <Text style={styles.statLabel}>Chiffre d'affaires</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>{stats.orderCount}</Text>
+            <Text style={styles.statLabel}>Commandes servies</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>
+              {stats.topDish ? `${stats.topDish.name} (${stats.topDish.quantity})` : '—'}
+            </Text>
+            <Text style={styles.statLabel}>Plat le plus vendu</Text>
+          </View>
+        </View>
+      </View>
+      <View style={styles.cardsRow}>
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => nav.navigate('MenuManager')}
+          activeOpacity={0.88}
+        >
+          <Text style={styles.emoji}>📋</Text>
+          <Text style={styles.cardTitle}>Gestion des menus</Text>
+          <Text style={styles.cardDesc}>CRUD, promotions</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => nav.navigate('ReadyOrders')}
+          activeOpacity={0.88}
+        >
+          <Text style={styles.emoji}>🔔</Text>
+          <Text style={styles.cardTitle}>Plats prêts</Text>
+          <Text style={styles.cardDesc}>À servir aux tables</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => nav.navigate('ReleaseTable')}
+          activeOpacity={0.88}
+        >
+          <Text style={styles.emoji}>🪑</Text>
+          <Text style={styles.cardTitle}>Libérer une table</Text>
+          <Text style={styles.cardDesc}>Clients partis → table à nouveau libre</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => nav.navigate('TablesManager')}
+          activeOpacity={0.88}
+        >
+          <Text style={styles.emoji}>⊞</Text>
+          <Text style={styles.cardTitle}>Gestion des tables</Text>
+          <Text style={styles.cardDesc}>Ajouter ou supprimer des tables</Text>
+        </TouchableOpacity>
+      </View>
+      </ScrollView>
       <ChatFab onPress={() => setChatOpen(true)} />
       <ChatModal
         visible={chatOpen}
@@ -57,27 +94,66 @@ export default function DashboardScreen() {
 }
 
 const styles = StyleSheet.create({
+  wrapper: { flex: 1, backgroundColor: theme.colors.background },
+  scroll: { flex: 1 },
   container: {
-    flex: 1,
-    flexDirection: 'row',
     padding: theme.spacing.xl,
+    paddingBottom: theme.spacing.xxl,
+  },
+  statsSection: {
+    marginBottom: theme.spacing.xl,
+  },
+  statsTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: theme.colors.text,
+    marginBottom: theme.spacing.sm,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: theme.spacing.md,
+  },
+  statCard: {
+    flex: 1,
+    minWidth: 140,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    ...theme.shadows.sm,
+  },
+  statValue: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: theme.colors.primary,
+  },
+  statLabel: {
+    fontSize: 13,
+    color: theme.colors.textSecondary,
+    marginTop: 4,
+  },
+  cardsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: theme.spacing.lg,
-    backgroundColor: theme.colors.background,
   },
   card: {
     flex: 1,
+    minWidth: 140,
+    maxWidth: 220,
+    marginBottom: 0,
     backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.lg,
-    padding: theme.spacing.xl,
+    borderRadius: theme.borderRadius.xl,
+    padding: theme.spacing.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    ...theme.shadows.md,
   },
-  emoji: { fontSize: 48, marginBottom: theme.spacing.md },
-  cardTitle: { fontSize: 22, fontWeight: '700', color: theme.colors.text },
-  cardDesc: { fontSize: 16, color: theme.colors.textSecondary, marginTop: 8 },
+  emoji: { fontSize: 44, marginBottom: theme.spacing.sm },
+  cardTitle: { fontSize: 18, fontWeight: '700', color: theme.colors.text },
+  cardDesc: { fontSize: 14, color: theme.colors.textSecondary, marginTop: 4, textAlign: 'center' },
 });

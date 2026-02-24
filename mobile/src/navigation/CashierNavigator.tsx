@@ -6,6 +6,7 @@ import MenuFormScreen from '../screens/Cashier/MenuFormScreen';
 import ReadyOrdersScreen from '../screens/Cashier/ReadyOrdersScreen';
 import ReleaseTableScreen from '../screens/Cashier/ReleaseTableScreen';
 import TablesManagerScreen from '../screens/Cashier/TablesManagerScreen';
+import StaffHeaderBadge from '../components/common/StaffHeaderBadge';
 
 export type CashierStackParamList = {
   Dashboard: undefined;
@@ -20,7 +21,12 @@ const Stack = createNativeStackNavigator<CashierStackParamList>();
 
 export default function CashierNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: true }}>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: true,
+        headerRight: () => <StaffHeaderBadge />,
+      }}
+    >
       <Stack.Screen
         name="Dashboard"
         component={DashboardScreen}

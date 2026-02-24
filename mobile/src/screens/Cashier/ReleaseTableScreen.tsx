@@ -142,9 +142,12 @@ const styles = StyleSheet.create({
   tableCard: {
     width: '47%',
     backgroundColor: theme.colors.surface,
-    borderRadius: theme.borderRadius.md,
+    borderRadius: theme.borderRadius.lg,
     padding: theme.spacing.md,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    ...theme.shadows.sm,
   },
   tableNum: {
     fontSize: 18,
@@ -155,9 +158,10 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     paddingVertical: theme.spacing.sm,
     paddingHorizontal: theme.spacing.lg,
-    borderRadius: theme.borderRadius.sm,
+    borderRadius: theme.borderRadius.lg,
     minWidth: 100,
     alignItems: 'center',
+    ...theme.shadows.sm,
   },
   releaseBtnText: {
     color: '#fff',
@@ -184,7 +188,8 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing.sm,
     paddingHorizontal: theme.spacing.md,
     backgroundColor: theme.colors.primary,
-    borderRadius: theme.borderRadius.sm,
+    borderRadius: theme.borderRadius.lg,
+    ...theme.shadows.sm,
   },
   pageBtnDisabled: {
     opacity: 0.5,
